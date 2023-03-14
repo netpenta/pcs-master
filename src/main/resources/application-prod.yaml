@@ -1,0 +1,35 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /pcs-authen
+app:
+  env: prod
+  component: pcs-authen
+  module-name: PCS
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: penta
+    password: Pentasol2022@@
+    url: jdbc:mysql://localhost:3306/pcs_okm
+
+springdoc:
+  api-docs:
+    path: /swagger/api-docs
+  swagger-ui:
+    path: /swagger/swagger-ui.html
+    operationsSorter: method
+
+logging:
+  level:
+    org:
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
+
+jwt:
+  secret: pentasol@okame!
+  expire: 720
