@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
   servlet:
     context-path: /pcs-master
 app:
@@ -34,3 +34,8 @@ logging:
 jwt:
   secret: pentasol@okame!
   expire: 720
+
+pcs:
+  default:
+    config:
+      effect-date: 20230101
