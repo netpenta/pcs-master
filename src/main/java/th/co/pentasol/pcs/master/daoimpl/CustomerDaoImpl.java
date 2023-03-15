@@ -37,19 +37,19 @@ public class CustomerDaoImpl implements CustomerDao {
         if(!Objects.isNull(filter)){
             if(Util.isNotEmpty(filter.getSearch())) {
                 sql.append("AND (");
-                sql.append("mcs.code LIKE :search OR ");
-                sql.append("mcs.branch_cd LIKE :search OR ");
-                sql.append("mcs.cust_nm LIKE :search OR ");
-                sql.append("mcs.cust_nm_th LIKE :search OR ");
-                sql.append("mcs.cust_short_nm LIKE :search OR ");
-                sql.append("mcs.cust_short_nm_th LIKE :search OR ");
-                sql.append("mcs.tax_id LIKE :search OR ");
-                sql.append("mcs.cust_branch_nm LIKE :search ");
+                sql.append("mcs.cust_cd LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.branch_cd LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.cust_nm LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.cust_nm_th LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.cust_short_nm LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.cust_short_nm_th LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.tax_id LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' OR ");
+                sql.append("mcs.cust_branch_nm LIKE '" + MySqlUtil.valueLike(filter.getSearch()) + "' ");
                 sql.append(")");
             }
 
             if(Util.isNotEmpty(filter.getEffectDate())){
-                sql.append("AND mcs.effect_date >= DATE_FORMAT('%Y%m%d', :effectDate) ");
+                sql.append("AND mcs.effect_date <= DATE_FORMAT(:effectDate, '%Y%m%d') ");
             }
 
             if(!count) sql.append(MySqlUtil.limit("", filter.getPageNo(), filter.getPageSize()));

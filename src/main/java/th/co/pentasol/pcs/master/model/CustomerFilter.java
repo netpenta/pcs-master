@@ -7,5 +7,6 @@ import java.util.Date;
 
 @Data
 public class CustomerFilter extends Pagination {
+    private  String customerCode;
     private Date effectDate;
 }
