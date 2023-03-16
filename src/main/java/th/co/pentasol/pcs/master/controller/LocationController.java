@@ -56,11 +56,11 @@ public class LocationController extends AbsController {
     @PostMapping(value = "/search", produces = "application/json;charset=UTF-8")
     public ResponseEntity<ApiResponseWithPage> search(HttpServletRequest request, @RequestBody LocationFilter filter) throws ServiceException {
         UserInfo userInfo = userService.getUserInfo(request);
-        Long rowcount = locationService.getRowCountLocationByCondition(filter, userInfo);
+        Long rowCount = locationService.getRowCountLocationByCondition(filter, userInfo);
         List<Map<String, Object>> dataList = new ArrayList<>();
-        if(rowcount.intValue() > 0){
+        if(rowCount.intValue() > 0){
             dataList = locationService.getLocationListByCondition(filter, userInfo);
         }
-        return responseWithPageOK(dataList, rowcount, filter.getPageNo(), filter.getPageSize());
+        return responseWithPageOK(dataList, rowCount, filter.getPageNo(), filter.getPageSize());
     }
 }

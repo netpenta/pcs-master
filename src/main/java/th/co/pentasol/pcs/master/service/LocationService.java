@@ -36,6 +36,8 @@ public class LocationService {
         data.put("rowNo", rowNo);
         data.put("code", entity.getPlaceCd());
         data.put("name", entity.getPlaceNm());
+        data.put("nameTh", entity.getPlaceThNm());
+        data.put("effectDate", entity.getEffectDate());
         data.put("updatedBy", entity.getUpdatedBy());
         data.put("updatedDate", Objects.isNull(entity.getModifiedDatetime()) ? DateTimeUtil.convertDateToddMMyyyyHHmmss(entity.getCreatedDatetime()) : DateTimeUtil.convertDateToddMMyyyyHHmmss(entity.getModifiedDatetime()));
         return data;
@@ -52,7 +54,7 @@ public class LocationService {
     public Map<String, Object> save(LocationModel data, UserInfo userInfo) throws ServiceException{
          try {
             data.setSerialNo(1);
-            data.setEffectDate(config.getEffectDate());
+            data.setEffectDate(config.getEffectDate()); //recheck input or set default 20230101
             data.setUpdatedBy(userInfo.getUserName());
             data.setUpdatedDate(new Date());
             data.setSystemId(this.getClass().getName() + ".save");

@@ -7,6 +7,8 @@ import java.util.Date;
 public class LocationModel {
     private String code;
     private String name;
+    private String nameTh;
+    private String type;
     private Integer serialNo;
     private Integer effectDate;
     private String updatedBy;
