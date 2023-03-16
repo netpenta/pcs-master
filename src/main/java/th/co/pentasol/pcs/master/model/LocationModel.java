@@ -5,7 +5,6 @@ import lombok.Data;
 import java.util.Date;
 @Data
 public class LocationModel {
-    private Long locationId;
     private String code;
     private String name;
     private Integer serialNo;
