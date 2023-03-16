@@ -18,4 +18,5 @@ public interface CustomerDao {
     int update(CustomerModel data);
 
     int deleteOne(CustomerEntity entity);
+
 }
