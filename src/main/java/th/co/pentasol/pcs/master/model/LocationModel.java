@@ -8,9 +8,9 @@ public class LocationModel {
     private String code;
     private String name;
     private String nameTh;
-    private String type;
+    private Integer type;
     private Integer serialNo;
-    private Integer effectDate;
+    private String effectDate;
     private String updatedBy;
     private Date updatedDate;
     private String systemId;

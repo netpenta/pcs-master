@@ -12,7 +12,7 @@ public class LocationEntity { //same name with Database
     private Integer serialNo;
     private Integer effectDate;
     private Integer expDate;
-    private String updatedBy;
+    private String userId;
     private Date createdDatetime;
     private Date modifiedDatetime;
 }

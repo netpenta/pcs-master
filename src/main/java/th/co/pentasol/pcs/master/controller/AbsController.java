@@ -5,7 +5,6 @@ import th.co.pentasol.pcs.master.component.Message;
 import th.co.pentasol.pcs.master.model.api.ApiMessage;
 import th.co.pentasol.pcs.master.model.api.ApiPaginator;
 import th.co.pentasol.pcs.master.model.api.ApiResponse;
-import th.co.pentasol.pcs.master.model.api.ApiResponseWithPage;
 import th.co.pentasol.pcs.master.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -70,13 +69,4 @@ public class AbsController{
         return new ResponseEntity<>(apiResponse, HttpStatus.OK);
     }
 
-    public ResponseEntity<ApiResponseWithPage> responseWithPageOK(Object data, Long totalRecords, Integer pageNo, Integer pageSize){
-        ApiResponseWithPage apiResponse = new ApiResponseWithPage();
-        apiResponse.setCurrentPage(pageNo);
-        apiResponse.setPageSize(pageSize);
-        apiResponse.setTotalPage(Util.calculateTotalPage(totalRecords, pageSize));
-        apiResponse.setTotalRecord(totalRecords.intValue());
-        apiResponse.setData(data);
-        return new ResponseEntity<>(apiResponse, HttpStatus.OK);
-    }
 }

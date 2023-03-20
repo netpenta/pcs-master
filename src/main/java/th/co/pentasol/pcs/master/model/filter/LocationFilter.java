@@ -9,5 +9,7 @@ import th.co.pentasol.pcs.master.model.api.Pagination;
 public class LocationFilter extends Pagination {
     private String code;
     private String name;
-    private String type;
+    private Integer type;
+    private String typeName;
+    private String factory;
 }

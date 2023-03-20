@@ -52,6 +52,10 @@ public class Message {
         return new ApiMessage(INFO, messageSource.getMessage(MSG_UPDATE_SUCCESS, null, locale));
     }
 
+    public ApiMessage getRestoreMessage(Locale locale){
+        return new ApiMessage(INFO, messageSource.getMessage("msg.restore.data.success", null, locale));
+    }
+
     public ApiMessage getNotFoundMessage(Locale locale){
         return new ApiMessage(INFO, messageSource.getMessage(MSG_NOT_FOUND, null, locale));
     }

@@ -10,7 +10,6 @@ import th.co.pentasol.pcs.master.model.LocationModel;
 import th.co.pentasol.pcs.master.model.SelectedModel;
 import th.co.pentasol.pcs.master.model.UserInfo;
 import th.co.pentasol.pcs.master.model.api.ApiResponse;
-import th.co.pentasol.pcs.master.model.api.ApiResponseWithPage;
 import th.co.pentasol.pcs.master.model.filter.LocationFilter;
 import th.co.pentasol.pcs.master.service.LocationService;
 
@@ -41,6 +40,12 @@ public class LocationController extends AbsController {
         return responseOK(locationService.delete(data, userInfo));
     }
 
+    @GetMapping(value = "/{code}/restore", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<ApiResponse> restore(HttpServletRequest request, @PathVariable String code) throws ServiceException {
+        UserInfo userInfo = userService.getUserInfo(request);
+        return responseOK(locationService.restore(code, userInfo), message.getRestoreMessage(userInfo.getLocale()));
+    }
+
     @PostMapping(value = "/{code}/update", produces = "application/json;charset=UTF-8")
     public ResponseEntity<ApiResponse> update(HttpServletRequest request, @PathVariable String code, @Valid @RequestBody LocationModel data) throws ServiceException {
         UserInfo userInfo = userService.getUserInfo(request);
@@ -54,13 +59,14 @@ public class LocationController extends AbsController {
     }
 
     @PostMapping(value = "/search", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<ApiResponseWithPage> search(HttpServletRequest request, @RequestBody LocationFilter filter) throws ServiceException {
+    public ResponseEntity<ApiResponse> search(HttpServletRequest request, @RequestBody LocationFilter filter) throws ServiceException {
         UserInfo userInfo = userService.getUserInfo(request);
         Long rowCount = locationService.getRowCountLocationByCondition(filter, userInfo);
+        //This dataList for DataTable
         List<Map<String, Object>> dataList = new ArrayList<>();
         if(rowCount.intValue() > 0){
             dataList = locationService.getLocationListByCondition(filter, userInfo);
         }
-        return responseWithPageOK(dataList, rowCount, filter.getPageNo(), filter.getPageSize());
+        return responseOK(dataList, rowCount, filter.getPageNo(), filter.getPageSize());
     }
 }

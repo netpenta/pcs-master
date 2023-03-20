@@ -37,7 +37,7 @@ public class LocationDaoImpl implements LocationDao {
         sql.append("exp_date = 99999999, ");
         sql.append("place_nm = :name, ");
         sql.append("place_th_nm = :nameTh, ");
-        sql.append("place_type = :type, ");
+        sql.append("group_div = :type, ");
         sql.append("outside_flg = 0, "); //set outside_flg = 0 for "Work location"
         sql.append("division_cd = '01', ");
         sql.append("factory_cd = '01', ");
@@ -53,27 +53,49 @@ public class LocationDaoImpl implements LocationDao {
     @Override
     public void update(LocationModel data) {
         StringBuilder sql = new StringBuilder("\n");
+//        sql.append("UPDATE m_places SET ");
+//        sql.append("place_nm = :name, ");
+//        sql.append("place_th_nm = :nameTh, ");
+//        sql.append("group_div = :type, ");
+//        sql.append("effect_date = :effectDate, ");
+//        sql.append("user_id = :updatedBy, ");
+//        sql.append("program_id = :systemId, ");
+//        sql.append("modified_datetime = :updatedDate ");
+//        sql.append("WHERE place_cd = :code ");
+
         sql.append("UPDATE m_places SET ");
         sql.append("place_nm = :name, ");
         sql.append("place_th_nm = :nameTh, ");
-        sql.append("place_type = :type, ");
+//        sql.append("place_short_nm = :place_short_nm, ");
+        sql.append("group_div = :type, ");
         sql.append("effect_date = :effectDate, ");
+//        sql.append("exp_date = :exp_date, ");
+        sql.append("deleted_flg = 0, ");
         sql.append("user_id = :updatedBy, ");
         sql.append("program_id = :systemId, ");
-        sql.append("modified_datetime = :updatedDate ");
-        sql.append("WHERE place_cd = :code ");
+        sql.append("modified_datetime  = :updatedDate ");
+        sql.append("WHERE place_cd = :code AND serial_no = :serialNo;");
+
         namedParameterJdbcTemplate.update(sql.toString(), new BeanPropertySqlParameterSource(data));
     }
 
     private StringBuilder selectLocation(LocationFilter filter){
         StringBuilder sql = new StringBuilder("\n");
-        sql.append("SELECT place.*, user.user_name as updated_by FROM m_places as place \n");
-        sql.append("INNER JOIN m_user as user  ON user.user_name = place.user_id \n");
-        sql.append("WHERE place.deleted_flg = 0 ");
+//        sql.append("SELECT place.*, user.user_name as updated_by FROM m_places as place \n");
+//        sql.append("INNER JOIN m_user as user ON user.user_name = place.user_id \n");
+//        sql.append("WHERE place.deleted_flg = 0 ");
+        sql.append("SELECT place.*, \n");
+        sql.append("       STR_TO_DATE(place.effect_date, '%Y%m%d') as locat_effect_date, (CASE WHEN place.exp_date <> 99999999 THEN STR_TO_DATE(place.exp_date, '%Y%m%d') ELSE NULL END) as locat_exp_date, refer.reference_nm as group_div_nm, \n");
+        sql.append("       (SELECT fact_abbrnm FROM m_factory WHERE fact_cd = place.factory_cd AND fact_effdate <= CAST(DATE_FORMAT(NOW(), '%Y%m%d') as Decimal) AND CAST(DATE_FORMAT(NOW(), '%Y%m%d') as Decimal) <= fact_expdate ORDER BY fact_effdate, deleted_flg ASC LIMIT 1) as fact_abbrnm, \n");
+        sql.append("       (SELECT user_fname  FROM m_user WHERE user_name = place.user_id ORDER BY deleted_flg ASC LIMIT 1) as modified_by \n");
+        sql.append("FROM m_places as place \n");
+        sql.append("LEFT OUTER JOIN m_reference as refer ON CAST(refer.reference_cd AS UNSIGNED) = place.group_div AND reference_id = (SELECT config_2 FROM pcs_config WHERE deleted_flg = 0 AND config_define_field = 0 AND config_cd = 'REFERENCE') \n");
+        sql.append("WHERE place.outside_flg = 0 AND place.deleted_flg = 0 ");
         if(!Objects.isNull(filter)) {
-            if (Util.isNotEmpty(filter.getName())) sql.append("AND place.place_type LIKE :type ");
-            if (Util.isNotEmpty(filter.getName())) sql.append("AND place.place_nm LIKE :name ");
-            if (Util.isNotEmpty(filter.getCode())) sql.append("AND place.place_cd LIKE :code ");
+            if (filter.getType() > -1) sql.append("AND place.place_type = :type ");
+            if (Util.isNotEmpty(filter.getFactory())) sql.append("AND place.factory_cd = :factory ");
+            if (Util.isNotEmpty(filter.getCode())) sql.append("AND UPPER(place.place_cd) LIKE UPPER(:code) ");
+            if (Util.isNotEmpty(filter.getName())) sql.append("AND (UPPER(place.place_nm) LIKE UPPER(:name) ");
         }
         return sql;
     }
@@ -95,6 +117,12 @@ public class LocationDaoImpl implements LocationDao {
     }
 
     @Override
+    public void restore(LocationModel data) {
+        String sql = "UPDATE m_places SET deleted_flg = 0, user_id = :updatedBy, modified_datetime = :updatedDate, program_id = :systemId WHERE place_cd = :code AND serial_no = 1;";
+        namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(data));
+    }
+
+    @Override
     public Long rowCountByCondition(LocationFilter filter) {
         filter = setConditionValue(filter);
         return namedParameterJdbcTemplate.queryForObject(MySqlUtil.rowCountSql(selectLocation(filter)), new BeanPropertySqlParameterSource(filter), Long.class);
@@ -111,7 +139,8 @@ public class LocationDaoImpl implements LocationDao {
     }
 
     private LocationFilter setConditionValue(LocationFilter filter){
-        if(Util.isNotEmpty(filter.getType()))   filter.setCode(MySqlUtil.valueLike(filter.getType()));
+        if(filter.getType() > -1)   filter.setType(filter.getType());
+        if(Util.isNotEmpty(filter.getFactory()))   filter.setFactory(filter.getFactory());
         if(Util.isNotEmpty(filter.getCode()))   filter.setCode(MySqlUtil.valueLike(filter.getCode()));
         if(Util.isNotEmpty(filter.getName()))   filter.setName(MySqlUtil.valueLike(filter.getName()));
         return filter;
@@ -127,5 +156,14 @@ public class LocationDaoImpl implements LocationDao {
             }
         }
         return "place.created_datetime";
+    }
+
+    @Override
+    public boolean duplicateLocationCode(LocationModel data){
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(1) FROM m_places WHERE deleted_flg = 0 AND outside_flg = 0 AND UPPER(REPLACE(place_cd, ' ', '')) = UPPER(REPLACE(:code, ' ', '')) ");
+
+        Integer found = namedParameterJdbcTemplate.queryForObject(sql.toString(), new BeanPropertySqlParameterSource(data), Integer.class);
+        return found > 0 ? true : false;
     }
 }

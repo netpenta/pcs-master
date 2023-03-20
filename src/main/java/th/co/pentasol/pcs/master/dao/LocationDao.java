@@ -12,6 +12,8 @@ public interface LocationDao {
 
     void update(LocationModel data);
 
+    void restore(LocationModel data);
+
     LocationEntity findByLocation(String locationCode);
 
     Integer delete(SelectedModel data);
@@ -19,4 +21,6 @@ public interface LocationDao {
     Long rowCountByCondition(LocationFilter filter);
 
     List<LocationEntity> findByCondition(LocationFilter filter);
+
+    boolean duplicateLocationCode(LocationModel data);
 }
