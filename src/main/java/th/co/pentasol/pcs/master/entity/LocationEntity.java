@@ -8,6 +8,7 @@ import java.util.Date;
 public class LocationEntity { //same name with Database
     private String placeCd;
     private String placeNm;
+    private String placeThNm;
     private Integer serialNo;
     private Integer effectDate;
     private Integer expDate;

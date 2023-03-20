@@ -36,8 +36,9 @@ public class LocationDaoImpl implements LocationDao {
         sql.append("effect_date = :effectDate, ");
         sql.append("exp_date = 99999999, ");
         sql.append("place_nm = :name, ");
-        sql.append("place_type = 'LOCATION', ");
-        sql.append("outside_flg = 0, ");
+        sql.append("place_th_nm = :nameTh, ");
+        sql.append("place_type = :type, ");
+        sql.append("outside_flg = 0, "); //set outside_flg = 0 for "Work location"
         sql.append("division_cd = '01', ");
         sql.append("factory_cd = '01', ");
         sql.append("vat_div = 0, ");
@@ -54,6 +55,9 @@ public class LocationDaoImpl implements LocationDao {
         StringBuilder sql = new StringBuilder("\n");
         sql.append("UPDATE m_places SET ");
         sql.append("place_nm = :name, ");
+        sql.append("place_th_nm = :nameTh, ");
+        sql.append("place_type = :type, ");
+        sql.append("effect_date = :effectDate, ");
         sql.append("user_id = :updatedBy, ");
         sql.append("program_id = :systemId, ");
         sql.append("modified_datetime = :updatedDate ");
@@ -63,10 +67,11 @@ public class LocationDaoImpl implements LocationDao {
 
     private StringBuilder selectLocation(LocationFilter filter){
         StringBuilder sql = new StringBuilder("\n");
-        sql.append("SELECT place.*, user.user_name as updated_by FROM m_places as place\n");
-        sql.append("INNER JOIN m_user as user  ON user.user_name = place.user_id\n");
-        sql.append("WHERE place.deleted_flg = 0 AND place.place_type = 'LOCATION' ");
+        sql.append("SELECT place.*, user.user_name as updated_by FROM m_places as place \n");
+        sql.append("INNER JOIN m_user as user  ON user.user_name = place.user_id \n");
+        sql.append("WHERE place.deleted_flg = 0 ");
         if(!Objects.isNull(filter)) {
+            if (Util.isNotEmpty(filter.getName())) sql.append("AND place.place_type LIKE :type ");
             if (Util.isNotEmpty(filter.getName())) sql.append("AND place.place_nm LIKE :name ");
             if (Util.isNotEmpty(filter.getCode())) sql.append("AND place.place_cd LIKE :code ");
         }
@@ -106,6 +111,7 @@ public class LocationDaoImpl implements LocationDao {
     }
 
     private LocationFilter setConditionValue(LocationFilter filter){
+        if(Util.isNotEmpty(filter.getType()))   filter.setCode(MySqlUtil.valueLike(filter.getType()));
         if(Util.isNotEmpty(filter.getCode()))   filter.setCode(MySqlUtil.valueLike(filter.getCode()));
         if(Util.isNotEmpty(filter.getName()))   filter.setName(MySqlUtil.valueLike(filter.getName()));
         return filter;
