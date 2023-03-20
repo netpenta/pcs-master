@@ -1,7 +1,7 @@
 package th.co.pentasol.pcs.master.dao;
 
 import th.co.pentasol.pcs.master.entity.CustomerEntity;
-import th.co.pentasol.pcs.master.model.CustomerFilter;
+import th.co.pentasol.pcs.master.model.filter.CustomerFilter;
 import th.co.pentasol.pcs.master.model.CustomerModel;
 
 import java.util.List;
@@ -9,13 +9,25 @@ import java.util.List;
 public interface CustomerDao {
     List<CustomerEntity> findAll();
 
-    Long countByCondition(CustomerFilter filter);
+    Long rowcountByCondition(CustomerFilter filter);
 
     List<CustomerEntity> findAllByCondition(CustomerFilter filter);
 
-    int save(CustomerModel data);
+    CustomerEntity findOneByCondition(CustomerFilter filter);
+
+    CustomerEntity findOneByCode(String code);
+
+    CustomerEntity findOneByFilter(CustomerFilter filter);
+
+    boolean duplicateCustomerCode(CustomerModel data);
+
+    boolean duplicateCustomerName(CustomerModel data);
+
+    int insert(CustomerModel data);
 
     int update(CustomerModel data);
 
-    int deleteOne(CustomerEntity entity);
+    int delete(CustomerEntity entity);
+
+    Integer getMaxSerialNo(String code, String branchCode);
 }
