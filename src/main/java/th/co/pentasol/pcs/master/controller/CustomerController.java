@@ -69,6 +69,7 @@ public class CustomerController extends AbsController{
         if(rowCount > 0){
             return responseOK(message.getMsgDuplicateName(userInfo.getLocale()));
         }else {
+            // Input code, branchCode
             return responseOK(customerService.save(userInfo, data), message.getSavedMessage(userInfo.getLocale()));
         }
     }
