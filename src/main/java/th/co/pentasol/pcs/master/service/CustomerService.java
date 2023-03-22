@@ -34,7 +34,7 @@ public class CustomerService {
     @Autowired
     CustomerDao customerDao;
 
-    public CustomerService(Message message, CustomerDao customerDao) {
+    public CustomerService(Message message, CustomerDao customerDao) throws ServiceException {
         this.message = message;
         this.customerDao = customerDao;
     }
@@ -50,55 +50,28 @@ public class CustomerService {
     }
 
     public Long getRowCountByCondition(UserInfo userInfo, CustomerFilter filter) throws ServiceException {
-        try{
-            return customerDao.rowcountByCondition(filter);
-        }catch (Exception ex){
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return customerDao.rowcountByCondition(filter);
     }
 
     public List<CustomerListModel> getCustomerListByCondition(UserInfo userInfo, CustomerFilter filter) throws ServiceException{
-        try{
-            List<CustomerListModel> dataList = new ArrayList<>();
-            List<CustomerEntity> entityList = customerDao.findAllByCondition(filter);
-            int rowNo = 1;
-            for(CustomerEntity entity : entityList){
-                dataList.add(entityToModelList(entity, userInfo, rowNo));
-                rowNo++;
-            }
-            return dataList;
-        }catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
+        List<CustomerListModel> dataList = new ArrayList<>();
+        List<CustomerEntity> entityList = customerDao.findAllByCondition(filter);
+        int rowNo = 1;
+        for(CustomerEntity entity : entityList){
+            dataList.add(entityToModelList(entity, userInfo, rowNo));
+            rowNo++;
         }
-
+        return dataList;
     }
     public CustomerModel getCustomerByCondition(UserInfo userInfo, CustomerFilter filter) throws ServiceException{
-        try{
-            return entityToModel(customerDao.findOneByCondition(filter), userInfo);
-        }catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
-
+        return entityToModel(customerDao.findOneByCondition(filter), userInfo);
     }
     public CustomerModel getCustomerByCode(UserInfo userInfo, String code) throws ServiceException{
-        try {
-            return entityToModel(customerDao.findOneByCode(code), userInfo);
-        }catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return entityToModel(customerDao.findOneByCode(code), userInfo);
     }
 
     public CustomerModel getCustomerByFilter(UserInfo userInfo, CustomerFilter filter) throws ServiceException{
-        try {
-            return entityToModel(customerDao.findOneByFilter(filter), userInfo);
-        }catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return entityToModel(customerDao.findOneByFilter(filter), userInfo);
     }
 
     private CustomerEntity modelToEntity(CustomerModel model){
@@ -229,28 +202,23 @@ public class CustomerService {
     }
 
     public CustomerModel save(UserInfo userInfo, CustomerModel data) throws ServiceException {
-        try{
-            List<CustomerListModel> dataList = setExpireDate(userInfo, data);
-            Integer serial_no = getMaxSerialNo(data);
-            for(CustomerListModel row:dataList){
-                row.setModifiedBy(userInfo.getUserName());
-                row.setSystemId(this.getClass().getName() + ".save");
-                if(Objects.isNull(row.getSerialNo()) || row.getSerialNo() == 0){
-                    row.setSerialNo(serial_no);
-                    customerDao.insert(modelListToModel(row, userInfo));
-                }else{
-                    customerDao.update(modelListToModel(row, userInfo));
-                }
+        List<CustomerListModel> dataList = setExpireDate(userInfo, data);
+        Integer serial_no = getMaxSerialNo(data);
+        for(CustomerListModel row:dataList){
+            row.setModifiedBy(userInfo.getUserName());
+            row.setSystemId(this.getClass().getName() + ".save");
+            if(Objects.isNull(row.getSerialNo()) || row.getSerialNo() == 0){
+                row.setSerialNo(serial_no);
+                customerDao.insert(modelListToModel(row, userInfo));
+            }else{
+                customerDao.update(modelListToModel(row, userInfo));
             }
-            CustomerFilter filter = new CustomerFilter();
-            filter.setCustomerCode(data.getCode());
-            filter.setBranchCode(data.getBranchCode());
-            filter.setSerialNo(serial_no);
-            return getCustomerByCondition(userInfo, filter);
-        }catch (Exception ex) {
-            log.error(this.getClass().getName() + ".save", ex);
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
         }
+        CustomerFilter filter = new CustomerFilter();
+        filter.setCustomerCode(data.getCode());
+        filter.setBranchCode(data.getBranchCode());
+        filter.setSerialNo(serial_no);
+        return getCustomerByCondition(userInfo, filter);
     }
     private Integer getMaxSerialNo(CustomerModel data) {
         return customerDao.getMaxSerialNo(data.getCode(), data.getBranchCode());
@@ -281,41 +249,30 @@ public class CustomerService {
     }
 
     public CustomerModel update(UserInfo userInfo, CustomerModel data) throws ServiceException {
-        try{
-            // ----- unnecessary with jsf ?
-            CustomerFilter filter = new CustomerFilter();
-            CustomerModel oldData = new CustomerModel();
-            filter.setCustomerCode(data.getCode());
-            filter.setBranchCode(data.getBranchCode());
-            filter.setSerialNo(data.getSerialNo());
-            oldData = entityToModel(customerDao.findOneByCondition(filter),userInfo);
-            data.setEffectDate(oldData.getEffectDate());
-            data.setExpDate(oldData.getExpDate());
-            // -----------------------------
+        // ----- unnecessary with jsf ?
+        CustomerFilter filter = new CustomerFilter();
+        CustomerModel oldData = new CustomerModel();
+        filter.setCustomerCode(data.getCode());
+        filter.setBranchCode(data.getBranchCode());
+        filter.setSerialNo(data.getSerialNo());
+        oldData = entityToModel(customerDao.findOneByCondition(filter),userInfo);
+        data.setEffectDate(oldData.getEffectDate());
+        data.setExpDate(oldData.getExpDate());
+        // -----------------------------
 
-            data.setModifiedBy(userInfo.getUserName());
-            data.setSystemId(this.getClass().getName() + ".update");
-            customerDao.update(data);
-
-            return getCustomerByFilter(userInfo, filter);
-        }catch (Exception ex){
-            log.error(this.getClass().getName() + ".update", ex);
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        data.setModifiedBy(userInfo.getUserName());
+        data.setSystemId(this.getClass().getName() + ".update");
+        customerDao.update(data);
+        return getCustomerByFilter(userInfo, filter);
     }
 
     public ApiMessage delete(UserInfo userInfo, CustomerModel data) throws  ServiceException{
-        try{
-            if(!Objects.isNull(data)){
-                data.setExpDate(DateTimeUtil.convertDateToNumeric(new Date()));
-                data.setModifiedBy(userInfo.getUserName());
-                data.setSystemId(this.getClass().getName() + ".delete");
-                customerDao.delete(modelToEntity(data));
-            }
-
-            return message.getDeletedMessage(true, userInfo.getLocale());
-        }catch (Exception ex){
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
+        if(!Objects.isNull(data)){
+            data.setExpDate(DateTimeUtil.convertDateToNumeric(new Date()));
+            data.setModifiedBy(userInfo.getUserName());
+            data.setSystemId(this.getClass().getName() + ".delete");
+            customerDao.delete(modelToEntity(data));
         }
+        return message.getDeletedMessage(true, userInfo.getLocale());
     }
 }
