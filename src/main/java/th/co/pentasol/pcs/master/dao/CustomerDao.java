@@ -23,11 +23,15 @@ public interface CustomerDao {
 
     boolean duplicateCustomerName(CustomerModel data);
 
-    int insert(CustomerModel data);
+    Integer insert(CustomerModel data);
 
-    int update(CustomerModel data);
+    Integer update(CustomerModel data);
 
-    int delete(CustomerEntity entity);
+    Integer delete(CustomerEntity entity);
 
     Integer getMaxSerialNo(String code, String branchCode);
+
+    Integer restore(CustomerEntity entity);
+
+    Integer updateRestore(CustomerModel data);
 }

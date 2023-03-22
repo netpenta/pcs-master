@@ -73,7 +73,7 @@ public class CustomerDaoImpl implements CustomerDao {
     public List<CustomerEntity> findAll(){
         String sql = selectCustomerSql(false,null).append("ORDER BY mcs.cust_cd, mcs.branch_cd ASC").toString();
         try{
-                return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerEntity.class));
+            return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerEntity.class));
         }catch (EmptyResultDataAccessException ignored){
             return null;
         }
@@ -122,7 +122,7 @@ public class CustomerDaoImpl implements CustomerDao {
     }
 
     @Override
-    public int insert(CustomerModel data){
+    public Integer insert(CustomerModel data){
         String sql = "INSERT INTO m_customers SET " +
                 "cust_cd = :code," +
                 "branch_cd = :branchCode, " +
@@ -153,7 +153,7 @@ public class CustomerDaoImpl implements CustomerDao {
     }
 
     @Override
-    public int update(CustomerModel data){
+    public Integer update(CustomerModel data){
         String sql = "UPDATE m_customers SET " +
                 "effect_date = :effectDate, " +
                 "exp_date = :expDate, " +
@@ -177,19 +177,41 @@ public class CustomerDaoImpl implements CustomerDao {
                 "user_id = :userName, " +
                 "program_id = :systemId, " +
                 "modified_datetime = NOW() " +
-                "WHERE cust_cd = :code AND branch_cd = :branchCode AND serial_no = :serialNo;";
+                "WHERE cust_cd = :code AND branch_cd = :branchCode AND serial_no = :serialNo ;";
         return namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(data));
     }
 
     @Override
-    public int delete(CustomerEntity entity){
+    public Integer updateRestore(CustomerModel data){
+        String sql = "UPDATE m_customers SET " +
+                "deleted_flg = 0, " +
+                "user_id = :userName, " +
+                "program_id = :systemId, " +
+                "modified_datetime = NOW() " +
+                "WHERE cust_cd = :code AND branch_cd = :branchCode AND effect_date = :effectDate ;";
+        return namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(data));
+    }
+
+    @Override
+    public Integer delete(CustomerEntity entity){
         String sql = "UPDATE m_customers SET " +
                 "exp_date = :exp_date, " +
                 "deleted_flg = 1, " +
                 "modified_datetime = NOW(), "+
                 "user_id = :user_id, " +
                 "program_id = :program_id " +
-                "WHERE cust_cd = :cust_cd AND branch_cd = :branch_cd AND serial_no = :serial_no;";
+                "WHERE cust_cd = :cust_cd AND branch_cd = :branch_cd AND effect_date = :effect_date;";
+        return namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(entity));
+    }
+
+    @Override
+    public Integer restore(CustomerEntity entity){
+        String sql = "UPDATE m_customers SET " +
+                "deleted_flg = 0, " +
+                "modified_datetime = NOW(), "+
+                "user_id = :user_id, " +
+                "program_id = :program_id " +
+                "WHERE cust_cd = :cust_cd AND branch_cd = :branch_cd AND effect_date = :effect_date;";
         return namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(entity));
     }
 

@@ -86,6 +86,18 @@ public class CustomerService {
         return data;
     }
 
+    private CustomerEntity modelListToEntity(CustomerListModel model){
+        CustomerEntity data = new CustomerEntity();
+        data.setCust_cd(model.getCode());
+        data.setBranch_cd(model.getBranchCode());
+        data.setSerial_no(model.getSerialNo());
+        data.setEffect_date(model.getEffectDate());
+        data.setExp_date(model.getExpDate());
+        data.setUser_id(model.getModifiedBy());
+        data.setProgram_id(model.getSystemId());
+        return data;
+    }
+
     private CustomerModel entityToModel(CustomerEntity entity, UserInfo userInfo){
         CustomerModel data = new CustomerModel();
         data.setCode(entity.getCust_cd());
@@ -268,11 +280,59 @@ public class CustomerService {
 
     public ApiMessage delete(UserInfo userInfo, CustomerModel data) throws  ServiceException{
         if(!Objects.isNull(data)){
+            data.setEffectDate(DateTimeUtil.convertDateToNumeric(data.getEffectiveDate()));
             data.setExpDate(DateTimeUtil.convertDateToNumeric(new Date()));
             data.setModifiedBy(userInfo.getUserName());
             data.setSystemId(this.getClass().getName() + ".delete");
             customerDao.delete(modelToEntity(data));
         }
         return message.getDeletedMessage(true, userInfo.getLocale());
+    }
+
+    public CustomerModel restore(UserInfo userInfo, CustomerModel data) throws ServiceException{
+        data.setEffectDate(DateTimeUtil.convertDateToNumeric(data.getEffectiveDate()));
+        data.setModifiedBy(userInfo.getUserName());
+        data.setSystemId(this.getClass().getName() + ".restore");
+        customerDao.updateRestore(data);
+        List<CustomerListModel> dataList = setExpireDate(userInfo, data);
+        for(CustomerListModel row:dataList){
+//            System.out.println("----- : " + row.getSerialNo() + " | " + row.getEffectDate());
+//            row.setEffectDate(DateTimeUtil.convertDateToNumeric(data.getEffectiveDate()));
+//            row.setModifiedBy(userInfo.getUserName());
+//            row.setSystemId(this.getClass().getName() + ".restore");
+//            if(Objects.isNull(row.getSerialNo()) || row.getSerialNo() == 0){
+//                customerDao.restore(modelListToEntity(row));
+//            }else{
+//                customerDao.update(modelListToModel(row, userInfo));
+//            }
+        }
+        CustomerFilter filter = new CustomerFilter();
+//        filter.setCustomerCode(data.getCode());
+//        filter.setBranchCode(data.getBranchCode());
+//        return getCustomerByCondition(userInfo, filter);
+        return null;
+    }
+
+    public CustomerModel renew(UserInfo userInfo, CustomerModel data) throws ServiceException{
+//        customerDao.delete(modelToEntity(data));
+//        List<CustomerListModel> dataList = setExpireDate(userInfo, data);
+//        Integer serial_no = getMaxSerialNo(data);
+//        for(CustomerListModel row:dataList){
+//            row.setEffectDate(DateTimeUtil.convertDateToNumeric(data.getEffectiveDate()));
+//            row.setModifiedBy(userInfo.getUserName());
+//            row.setSystemId(this.getClass().getName() + ".renew");
+//            if(Objects.isNull(row.getSerialNo()) || row.getSerialNo() == 0){
+//                row.setSerialNo(serial_no);
+//                customerDao.insert(modelListToModel(row, userInfo));
+//            }else{
+//                customerDao.update(modelListToModel(row, userInfo));
+//            }
+//        }
+        CustomerFilter filter = new CustomerFilter();
+//        filter.setCustomerCode(data.getCode());
+//        filter.setBranchCode(data.getBranchCode());
+//        filter.setSerialNo(serial_no);
+//        return getCustomerByCondition(userInfo, filter);
+        return null;
     }
 }

@@ -18,6 +18,7 @@ import th.co.pentasol.pcs.master.service.CustomerService;
 import th.co.pentasol.pcs.master.util.DateTimeUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.text.html.HTML;
 import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
@@ -87,5 +88,17 @@ public class CustomerController extends AbsController{
     public ResponseEntity<ApiResponse> delete(HttpServletRequest request, @RequestBody CustomerModel data) throws ServiceException{
         UserInfo userInfo = userService.getUserInfo(request);
         return responseOK(customerService.delete(userInfo, data));
+    }
+
+    @PostMapping(value = "/restore", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<ApiResponse> restore(HttpServletRequest request, @RequestBody CustomerModel data ) throws ServiceException{
+        UserInfo userInfo = userService.getUserInfo(request);
+        return responseOK(customerService.restore(userInfo, data));
+    }
+
+    @PostMapping(value = "/renew", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<ApiResponse> renew(HttpServletRequest request, @RequestBody CustomerModel data ) throws ServiceException{
+        UserInfo userInfo = userService.getUserInfo(request);
+        return responseOK(customerService.renew(userInfo, data));
     }
 }
