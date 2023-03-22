@@ -44,106 +44,70 @@ public class LocationService {
         return data;
     }
     public Map<String, Object> getLocation(String locationCode, UserInfo userInfo) throws ServiceException {
-        try {
-            LocationEntity entity = locationDao.findByLocation(locationCode);
-            //Same FJM
-            return mapLocationResult(1, entity);
-        } catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        LocationEntity entity = locationDao.findByLocation(locationCode);
+        //Same FJM
+        return mapLocationResult(1, entity);
     }
     public Map<String, Object> save(LocationModel data, UserInfo userInfo) throws ServiceException{
         if(locationDao.duplicateLocationCode(data)){
             throw new ServiceException(ApiStatus.STATUS_BAD_REQUEST, message.getApiMessageWarning("msg.duplicate.location.code", userInfo.getLocale()));
         }
+        data.setSerialNo(1);
+        data.setEffectDate(Util.isNotEmpty(data.getEffectDate()) ? data.getEffectDate() : config.getEffectDate().toString());
+        data.setUpdatedBy(userInfo.getUserName());
+        data.setUpdatedDate(new Date());
+        data.setSystemId(this.getClass().getName() + ".save");
+        locationDao.insert(data);
 
-        try {
-            data.setSerialNo(1);
-            data.setEffectDate(Util.isNotEmpty(data.getEffectDate()) ? data.getEffectDate() : config.getEffectDate().toString());
-            data.setUpdatedBy(userInfo.getUserName());
-            data.setUpdatedDate(new Date());
-            data.setSystemId(this.getClass().getName() + ".save");
-            locationDao.insert(data);
-
-            return getLocation(data.getCode(), userInfo);
-        } catch (Exception ex){
-            log.error(this.getClass().getName() + ".save", ex);
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return getLocation(data.getCode(), userInfo);
     }
 
     public ApiMessage delete(SelectedModel data, UserInfo userInfo) throws ServiceException {
-        try{
-            if(!Objects.isNull(data.getSelectedList()) && data.getSelectedList().size() > 0){
-                data.setUserId(userInfo.getUserName());
-                data.setModifiedDateTime(new Date());
-                data.setProgramId(this.getClass().getName() + ".delete");
+        if(!Objects.isNull(data.getSelectedList()) && data.getSelectedList().size() > 0){
+            data.setUserId(userInfo.getUserName());
+            data.setModifiedDateTime(new Date());
+            data.setProgramId(this.getClass().getName() + ".delete");
 
-                locationDao.delete(data);
-            }
-            return message.getDeletedMessage(true, userInfo.getLocale());
-        } catch (Exception ex){
-            log.error(this.getClass().getName() + ".delete", ex);
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
+            locationDao.delete(data);
         }
+        return message.getDeletedMessage(true, userInfo.getLocale());
     }
 
 
     public Map<String, Object> update(LocationModel data, UserInfo userInfo) throws ServiceException{
-        try {
-            data.setEffectDate(Util.isNotEmpty(data.getEffectDate()) ? data.getEffectDate() : config.getEffectDate().toString());
-            data.setUpdatedBy(userInfo.getUserName());
-            data.setUpdatedDate(new Date());
-            data.setSystemId(this.getClass().getName() + ".update");
-            locationDao.update(data);
+        data.setEffectDate(Util.isNotEmpty(data.getEffectDate()) ? data.getEffectDate() : config.getEffectDate().toString());
+        data.setUpdatedBy(userInfo.getUserName());
+        data.setUpdatedDate(new Date());
+        data.setSystemId(this.getClass().getName() + ".update");
+        locationDao.update(data);
 
-            return getLocation(data.getCode(), userInfo);
-        } catch (Exception ex){
-            log.error(this.getClass().getName() + ".update", ex);
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return getLocation(data.getCode(), userInfo);
     }
 
     public Long getRowCountLocationByCondition(LocationFilter filter, UserInfo userInfo) throws ServiceException {
-        try{
-            return locationDao.rowCountByCondition(filter);
-        } catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return locationDao.rowCountByCondition(filter);
     }
 
     public List<Map<String, Object>> getLocationListByCondition(LocationFilter filter, UserInfo userInfo) throws ServiceException {
-        try{
-                List<Map<String, Object>> result = new ArrayList<>();
-                //Found data with filter
-                List<LocationEntity> entityList = locationDao.findByCondition(filter);
-                // rowNo = (0*10)+1 = 1 , rowNo = (1*10)+1 = 11
-                Integer rowNo = (NumberUtil.convertToInteger(filter.getPageNo()) * NumberUtil.convertToInteger(filter.getPageSize())) + 1;
-                for(LocationEntity entity : entityList){
-                    result.add(mapLocationResult(rowNo, entity));
-                    rowNo++;
-                }
-                return result;
-        } catch (Exception ex) {
-            log.error(Util.logErrorMsg(this.getClass().getName(), ex.getMessage()));
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
+        List<Map<String, Object>> result = new ArrayList<>();
+        //Found data with filter
+        List<LocationEntity> entityList = locationDao.findByCondition(filter);
+        // rowNo = (0*10)+1 = 1 , rowNo = (1*10)+1 = 11
+        Integer rowNo = (NumberUtil.convertToInteger(filter.getPageNo()) * NumberUtil.convertToInteger(filter.getPageSize())) + 1;
+        for(LocationEntity entity : entityList){
+            result.add(mapLocationResult(rowNo, entity));
+            rowNo++;
         }
+        return result;
     }
     public Map<String, Object> restore(String code, UserInfo userInfo) throws ServiceException {
-        try{
-            LocationModel data = new LocationModel();
-            data.setCode(code);
-            data.setUpdatedBy(userInfo.getUserName());
-            data.setUpdatedDate(new Date());
-            data.setSystemId(this.getClass().getName() + ".restore");
-            locationDao.restore(data);
+        LocationModel data = new LocationModel();
+        data.setCode(code);
+        data.setUpdatedBy(userInfo.getUserName());
+        data.setUpdatedDate(new Date());
+        data.setSystemId(this.getClass().getName() + ".restore");
+        locationDao.restore(data);
 
-            return getLocation(data.getCode(), userInfo);
-        } catch (Exception ex){
-            log.error(this.getClass().getName() + ".restore", ex);
-            throw new ServiceException(ApiStatus.STATUS_INTERNAL_SERVER_ERROR, message.getInternalErrorMessage(userInfo.getLocale()));
-        }
+        return getLocation(data.getCode(), userInfo);
     }
 }
