@@ -293,19 +293,19 @@ public class CustomerService {
         data.setEffectDate(DateTimeUtil.convertDateToNumeric(data.getEffectiveDate()));
         data.setModifiedBy(userInfo.getUserName());
         data.setSystemId(this.getClass().getName() + ".restore");
-        customerDao.updateRestore(data);
-        List<CustomerListModel> dataList = setExpireDate(userInfo, data);
-        for(CustomerListModel row:dataList){
-//            System.out.println("----- : " + row.getSerialNo() + " | " + row.getEffectDate());
+        customerDao.updateRestore(modelToEntity(data));
+//        List<CustomerListModel> dataList = setExpireDate(userInfo, data);
+//        for(CustomerListModel row:dataList){
 //            row.setEffectDate(DateTimeUtil.convertDateToNumeric(data.getEffectiveDate()));
 //            row.setModifiedBy(userInfo.getUserName());
 //            row.setSystemId(this.getClass().getName() + ".restore");
+//            System.out.println("----- : " + row.getSerialNo() + " | " + row.getEffectDate() + " | " + row.getExpDate());
 //            if(Objects.isNull(row.getSerialNo()) || row.getSerialNo() == 0){
 //                customerDao.restore(modelListToEntity(row));
 //            }else{
 //                customerDao.update(modelListToModel(row, userInfo));
 //            }
-        }
+//        }
         CustomerFilter filter = new CustomerFilter();
 //        filter.setCustomerCode(data.getCode());
 //        filter.setBranchCode(data.getBranchCode());

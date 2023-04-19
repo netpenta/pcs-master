@@ -33,5 +33,5 @@ public interface CustomerDao {
 
     Integer restore(CustomerEntity entity);
 
-    Integer updateRestore(CustomerModel data);
+    Integer updateRestore(CustomerEntity entity);
 }

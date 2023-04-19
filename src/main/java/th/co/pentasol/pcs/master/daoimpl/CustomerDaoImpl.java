@@ -1,6 +1,5 @@
 package th.co.pentasol.pcs.master.daoimpl;
 
-import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -182,13 +181,14 @@ public class CustomerDaoImpl implements CustomerDao {
     }
 
     @Override
-    public Integer updateRestore(CustomerModel data){
+    public Integer updateRestore(CustomerEntity data){
         String sql = "UPDATE m_customers SET " +
+                "exp_date = 99999999, " +
                 "deleted_flg = 0, " +
-                "user_id = :userName, " +
-                "program_id = :systemId, " +
+                "user_id = :user_id, " +
+                "program_id = :program_id, " +
                 "modified_datetime = NOW() " +
-                "WHERE cust_cd = :code AND branch_cd = :branchCode AND effect_date = :effectDate ;";
+                "WHERE cust_cd = :cust_cd AND branch_cd = :branch_cd AND effect_date = :effect_date ;";
         return namedParameterJdbcTemplate.update(sql, new BeanPropertySqlParameterSource(data));
     }
 
@@ -217,7 +217,7 @@ public class CustomerDaoImpl implements CustomerDao {
 
     @Override
     public  CustomerEntity findOneByCode(String code){
-        StringBuilder sql = selectCustomerSql(false, null).append("AND mcs.cust_cd LIKE '" + MySqlUtil.valueLike(code) + "' ORDER BY serial_no DESC LIMIT 1 ");
+        StringBuilder sql = selectCustomerSql(false, null).append("AND mcs.cust_cd = '" + code + "' ORDER BY serial_no DESC LIMIT 1 ");
         try{
             return jdbcTemplate.queryForObject(sql.toString(), new BeanPropertyRowMapper<>(CustomerEntity.class));
         }catch (EmptyResultDataAccessException ignored){
