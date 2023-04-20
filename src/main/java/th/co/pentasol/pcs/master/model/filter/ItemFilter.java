@@ -8,7 +8,7 @@ public class ItemFilter extends Pagination {
     private String itemCode;
     private String itemRevNo;
     private String itemName1;
-    private String formatTage;
+    private String formatTag;
     private String purFactoryCode;
     private String modelName;
     private String inventoryGroup;

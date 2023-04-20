@@ -92,12 +92,12 @@ public class ItemDaoImpl implements ItemDao {
                 if (Util.isNotEmpty(filter.getItemRevNo())) {
                     sql.append("AND item.item_rev_no = :itemRevNo ");
                 }else{
-                    sql.append("AND item.item_rev_no = '' ");
+                    sql.append("AND item.item_rev_no = '0' ");
                 }
                 if (Util.isNotEmpty(filter.getItemName1())) {
                     sql.append("AND item.item_nm1 = :itemName1 ");
                 }
-                if (Util.isNotEmpty(filter.getFormatTage())) {
+                if (Util.isNotEmpty(filter.getFormatTag())) {
                     sql.append("AND item.format_tag = :formatTag ");
                 }
                 if (Util.isNotEmpty(filter.getPurFactoryCode())) {
@@ -221,7 +221,7 @@ public class ItemDaoImpl implements ItemDao {
         StringBuilder sql = selectItemSql(false, null);
 
         if(Util.isNotEmpty(itemCustCode)){
-            sql.append("AND item.item_cust_cd = "+ itemCustCode +" ");
+            sql.append("AND item.item_cust_cd = '"+ itemCustCode +"' ");
         }else {
             sql.append("AND item.item_cust_cd = '' ");
         }
@@ -237,7 +237,7 @@ public class ItemDaoImpl implements ItemDao {
     public ItemProcessEntity findOneItemProcessByCondition(String itemCustCode, String itemCode, String itemRevNo){
         StringBuilder sql = selectItemProcessSql(false, null);
         if(Util.isNotEmpty(itemCustCode)){
-            sql.append("AND procs.item_cust_cd = "+ itemCustCode +" ");
+            sql.append("AND procs.item_cust_cd = '"+ itemCustCode +"' ");
         }else {
             sql.append("AND procs.item_cust_cd = '' ");
         }
@@ -253,7 +253,7 @@ public class ItemDaoImpl implements ItemDao {
         StringBuilder sql = selectItemLocationSql(false, null);
 
         if(Util.isNotEmpty(itemCustCode)){
-            sql.append("AND places.item_cust_cd = "+ itemCustCode +" ");
+            sql.append("AND places.item_cust_cd = '"+ itemCustCode +"' ");
         }else {
             sql.append("AND places.item_cust_cd = '' ");
         }

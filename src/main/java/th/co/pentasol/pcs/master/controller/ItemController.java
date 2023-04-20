@@ -24,9 +24,13 @@ public class ItemController extends AbsController{
     @Autowired
     Message message;
     public ItemController(ItemService itemService) {this.itemService = itemService ;}
-    @GetMapping(value = "/{itemCustCode}/{itemCode}/{itemRevNo}", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<ApiResponse> view(HttpServletRequest request, @RequestParam(value = "itemCustCode", required = false) String itemCustCode, @RequestParam(value = "itemCode") String itemCode, @RequestParam(value = "itemRevNo") String itemRevNo) throws ServiceException{
+    @GetMapping(value = "/{itemCode}/{itemRevNo}/{itemCustCode}", produces = "application/json;charset=UTF-8")
+//    public ResponseEntity<ApiResponse> view(HttpServletRequest request, @RequestParam(value = "itemCustCode", required = false) String itemCustCode, @RequestParam(value = "itemCode") String itemCode, @RequestParam(value = "itemRevNo") String itemRevNo) throws ServiceException{
+    public ResponseEntity<ApiResponse> view(HttpServletRequest request,@PathVariable String itemCustCode, @PathVariable String itemCode, @PathVariable String itemRevNo) throws ServiceException{
         UserInfo userInfo = userService.getUserInfo(request);
+        if(itemCustCode.equalsIgnoreCase("empty")){
+            itemCustCode = "";
+        }
         return responseOK(itemService.getItemByCode(itemCustCode, itemCode, itemRevNo, userInfo));
     }
     @PostMapping(value = "/search", produces = "application/json;charset=UTF-8")
@@ -89,10 +93,10 @@ public class ItemController extends AbsController{
         UserInfo userInfo = userService.getUserInfo(request);
         return responseOK(itemService.update(data, userInfo));
     }
-
     @PostMapping(value = "/copy/{itemCustCode}/{itemCode}/{itemRevNo}", produces = "application/json;charset=UTF-8")
     public ResponseEntity<ApiResponse> copy(HttpServletRequest request, @RequestParam(value = "itemCustCode", required = false) String itemCustCode, @RequestParam(value = "itemCode") String itemCode, @RequestParam(value = "itemRevNo") String itemRevNo) throws ServiceException{
         UserInfo userInfo = userService.getUserInfo(request);
         return responseOK(itemService.getItemCopyByCode(itemCustCode, itemCode, itemRevNo, userInfo));
     }
+
 }
